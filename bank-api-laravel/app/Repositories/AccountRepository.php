@@ -28,21 +28,21 @@ class AccountRepository
 
     public function transfer($data, $user)
     {
-        if ($user->accounts->where('user_id', Auth::id())) {
+        
+        DB::transaction(function () use ($data) {
             $fromAccount = Account::where('account_number', $data['from_account'])->first();
             $toAccount = Account::where('account_number', $data['to_account'])->first();
 
             if ($fromAccount->balance < $data['amount']) {
                 throw new \Exception('Insufficient funds to complete the transfer.');
             }
+        $amount = $this->exchangeService->exchange($fromAccount->currency, $toAccount->currency, $data['amount']);
 
-            $amount = $this->exchangeService->exchange($fromAccount->currency, $toAccount->currency, $data['amount']);
+        $fromAccount->balance -= $data['amount'];
+        $toAccount->balance += $amount;
 
-            $fromAccount->balance -= $data['amount'];
-            $toAccount->balance += $amount;
-
-            $fromAccount->save();
-            $toAccount->save();
-        };
+        $fromAccount->save();
+        $toAccount->save();
+});
     }
 }

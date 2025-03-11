@@ -68,5 +68,12 @@
             <a href="/auth/register">Create account</a>
         </div>
     </div>
+
+    <script>
+        document.querySelector('.btn-primary').addEventListener('click', function() {
+            localStorage.removeItem('auth_token');
+            console.log('auth_token removed from localStorage');
+        });
+    </script>
 </body>
 </html>

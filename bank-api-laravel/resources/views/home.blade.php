@@ -116,34 +116,40 @@
         const accountsList = document.getElementById('accountsList');
 
         createAccountForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
+    event.preventDefault();
 
-            const currency = document.getElementById('currency').value;
+    const currency = document.getElementById('currency').value;
 
-            if (currency) {
-                try {
-                    const url = `/api/account/${currency}`;
-                    const token = localStorage.getItem('auth_token');
+    if (currency) {
+        try {
+            const url = `/api/account/${currency}`;
+            const token = localStorage.getItem('auth_token');
 
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json',
-                            'Authorization': `Bearer ${token}`,
-                        }
-                    });
-
-                    if (response.status == 200) {
-                        fetchAccounts();
-                        document.getElementById('currency').value = ''; 
-                    } else {
-                        console.error('Error creating account:', response.status);
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`,
                 }
+            });
+
+            if (response.status === 200) {
+                const data = await response.json();
+                const newToken = data.new_token;  
+
+                localStorage.setItem('auth_token', newToken);
+
+                fetchAccounts();
+                document.getElementById('currency').value = ''; 
+            } else {
+                console.error('Error creating account:', response.status);
             }
-        });
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+});
+
 
         async function fetchAccounts() {
             try {
